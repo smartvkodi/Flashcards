@@ -1,20 +1,22 @@
 package flashcards.actions;
 
-import flashcards.models.Action;
-import flashcards.models.AppMessages;
+import flashcards.models.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 class ExportToFile implements Action {
 
-    private FlashcardsApp app = FlashcardsApp.INSTANCE;
-    private String fileName;
+    private final String fileName;
+
+    ApplicationConsole console = new ApplicationConsole(System.out);
 
     public ExportToFile() {
-        app.appConsole.print(AppMessages.FILE_NAME.getMessage());
-        this.fileName = "./" + app.appScanner.nextLine();
+        console.print(AppMessages.FILE_NAME.getMessage());
+        ApplicationScanner scanner = new ApplicationScanner(System.in);
+        this.fileName = "./" + scanner.nextLine();
     }
 
     public ExportToFile(String fileName) {
@@ -26,17 +28,15 @@ class ExportToFile implements Action {
         try {
             PrintWriter writer = new PrintWriter(new FileWriter(fileName));
 
-            app.cardsList.values()
-                    .forEach(card -> writer.println(String.format("%s;%s;%s",
-                            card.getTerm(),
-                            card.getDefinition(),
-                            card.getMistakes())));
+            List<Card> cards = new Card().getCards();
 
+            cards.forEach(card -> writer.println(String.format("%s;%s;%s",
+                    card.getTerm(), card.getDefinition(), card.getMistakes())));
             writer.close();
 
-            app.appConsole.printf(AppMessages.SAVED_CARDS_NUMBER.getMessage(), app.cardsList.size());
+            console.printf(AppMessages.SAVED_CARDS_NUMBER.getMessage(), cards.size());
         } catch (IOException e) {
-            app.appConsole.print(AppMessages.IO_EXCEPTION.getMessage());
+            console.print(AppMessages.IO_EXCEPTION.getMessage());
         }
     }
 }

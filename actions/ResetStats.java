@@ -2,14 +2,16 @@ package flashcards.actions;
 
 import flashcards.models.Action;
 import flashcards.models.AppMessages;
+import flashcards.models.ApplicationConsole;
+import flashcards.models.Card;
 
 class ResetStats implements Action {
 
-    private final FlashcardsApp app = FlashcardsApp.INSTANCE;
-
     @Override
     public void execute() {
-        app.cardsList.values().forEach(card -> card.setMistakes(0));
-        app.appConsole.print(AppMessages.STATISTICS_SAVED.getMessage());
+        Card card = new Card();
+        ApplicationConsole console = new ApplicationConsole(System.out);
+        card.getCards().forEach(xCard -> xCard.setMistakes(0));
+        console.print(AppMessages.STATISTICS_SAVED.getMessage());
     }
 }

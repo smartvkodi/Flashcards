@@ -1,23 +1,19 @@
 package flashcards.actions;
 
-import flashcards.models.Action;
-import flashcards.models.AppMessages;
+import flashcards.models.*;
 
 class RemoveCard implements Action {
 
-    private final FlashcardsApp app = FlashcardsApp.INSTANCE;
-
     @Override
     public void execute() {
-        app.appConsole.print(AppMessages.REMOVE_WHICH_CARD.getMessage());
+        ApplicationConsole console = new ApplicationConsole(System.out);
+        console.print(AppMessages.REMOVE_WHICH_CARD.getMessage());
 
-        String term = app.appScanner.nextLine();
-
-        if (!app.cardsList.containsKey(term)) {
-            app.appConsole.printf(AppMessages.CARD_NOT_REMOVED.getMessage(), term);
+        String term = new ApplicationScanner(System.in).nextLine();
+        if (new Card().removeTerm(term)) {
+            console.print(AppMessages.CARD_REMOVED.getMessage());
         } else {
-            app.cardsList.remove(term);
-            app.appConsole.print(AppMessages.CARD_REMOVED.getMessage());
+            console.printf(AppMessages.CARD_NOT_REMOVED.getMessage(), term);
         }
     }
 }

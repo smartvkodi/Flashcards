@@ -2,17 +2,19 @@ package flashcards.actions;
 
 import flashcards.models.Action;
 import flashcards.models.AppMessages;
+import flashcards.models.ApplicationConsole;
 
 class Exit implements Action {
 
-    private final FlashcardsApp app = FlashcardsApp.INSTANCE;
-
     @Override
     public void execute() {
-        if (app.exportFile != null && !app.exportFile.isBlank()) {
-            new ExportToFile(app.exportFile).execute();
+        ApplicationConsole console = new ApplicationConsole(System.out);
+        String exportFile = new FlashcardsApp().getExportFile();
+
+        if (exportFile != null && !exportFile.isBlank()) {
+            new ExportToFile(exportFile).execute();
         }
 
-        app.appConsole.print(AppMessages.EXIT.getMessage());
+        console.print(AppMessages.EXIT.getMessage());
     }
 }

@@ -2,53 +2,47 @@ package flashcards.actions;
 
 import flashcards.models.Action;
 import flashcards.models.AppMessages;
+import flashcards.models.ApplicationConsole;
 import flashcards.models.Card;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class HardestCard implements Action {
 
-    private final FlashcardsApp app = FlashcardsApp.INSTANCE;
-
     @Override
     public void execute() {
-        int maxMistakes = 0;
-        int mistakes;
-        for (Card card : app.cardsList.values()) {
-            mistakes = card.getMistakes();
-            maxMistakes = Math.max(maxMistakes, mistakes);
-        }
+        List<Card> cards = new Card().getCards();
+        ApplicationConsole console = new ApplicationConsole(System.out);
 
-        if (maxMistakes == 0) {
-            app.appConsole.print(AppMessages.NO_CARDS_WITH_ERRORS.getMessage());
+        if (cards.size() == 0) {
+            console.print(AppMessages.NO_CARDS_WITH_ERRORS.getMessage());
         } else {
-            List<Card> hardestCards = new ArrayList<>();
+            int max = cards.stream().mapToInt(Card::getMistakes).max().orElseThrow();
+            List<Card> hardest = cards.stream().filter(c -> c.getMistakes() == max).collect(Collectors.toList());
 
-            int finalMaxMistakes = maxMistakes;
-            app.cardsList.values().stream()
-                    .filter(c -> c.getMistakes() == finalMaxMistakes)
-                    .forEach(hardestCards::add);
+            Card firstCard = hardest.get(0);
 
-            int hcSize = hardestCards.size();
+            int maxMistakes = firstCard.getMistakes();
+            int countHardest = hardest.size();
 
-            if (hcSize == 1) {
-                app.appConsole.printf(AppMessages.ONE_HARDEST_CARD.getMessage(),
-                        hardestCards.get(0).getTerm(), maxMistakes);
+            if (maxMistakes == 0) {
+                console.print(AppMessages.NO_CARDS_WITH_ERRORS.getMessage());
+            } else if (countHardest == 1) {
+                console.printf(AppMessages.ONE_HARDEST_CARD.getMessage(),
+                        firstCard.getTerm(), maxMistakes);
             } else {
-                StringBuilder message = new StringBuilder();
-                message.append(String
-                        .format(AppMessages.MANY_HARDEST_CARDS.getMessage(), hardestCards.get(0).getTerm()));
+                StringBuilder message = new StringBuilder(String
+                        .format(AppMessages.MANY_HARDEST_CARDS.getMessage(), firstCard.getTerm()));
 
-                for (int i = 1; i < hcSize; i++) {
-                    message.append(String
-                            .format(", \"%s\"", hardestCards.get(i).getTerm()));
+                for (int i = 1; i < hardest.size(); i++) {
+                    message.append(String.format(", \"%s\"", hardest.get(i).getTerm()));
                 }
 
                 message.append(String
                         .format(AppMessages.THERE_ARE_N_ERRORS.getMessage(), maxMistakes));
 
-                app.appConsole.print(message.toString());
+                console.print(message.toString());
             }
         }
     }

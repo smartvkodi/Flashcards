@@ -1,59 +1,69 @@
 package flashcards.actions;
 
-import flashcards.models.*;
+import flashcards.models.AppMessages;
+import flashcards.models.ApplicationConsole;
+import flashcards.models.ApplicationScanner;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public enum FlashcardsApp {
-    INSTANCE;
+public class FlashcardsApp {
 
-    Map<String, Card> cardsList = new LinkedHashMap<>();
-    ApplicationConsole appConsole = new ApplicationConsole(System.out);
-    ApplicationScanner appScanner;
+    private static String exportFile;
 
-    String importFile;
-    String exportFile;
+    public FlashcardsApp() {
+    }
 
-
-    public void run(String[] args) {
+    public FlashcardsApp(String[] args) {
         Map<String, String> configMap = parseArguments(args);
-
-        this.importFile = configMap.get("-import") != null ? configMap.get("-import") : "";
-        this.exportFile = configMap.get("-export") != null ? configMap.get("-export") : "";
+        String importFile = configMap.get("-import") != null ? configMap.get("-import") : "";
+        exportFile = configMap.get("-export") != null ? configMap.get("-export") : "";
 
         if (!importFile.isBlank()) {
             new ImportFromFile(importFile).execute();
         }
-
-        run();
     }
 
-    private void run() {
+    String getExportFile() {
+        return exportFile;
+    }
+
+    public void run() {
+        ApplicationConsole console = new ApplicationConsole(System.out);
+
         try (ApplicationScanner scanner = new ApplicationScanner(System.in)) {
-            appScanner = scanner;
             boolean spinApp = true;
             do {
-                appConsole.print(AppMessages.INPUT_ACTION.getMessage());
+                console.print(AppMessages.INPUT_ACTION.getMessage());
 
-                String option = appScanner.nextLine();
+                String option = scanner.nextLine();
                 switch (option.toLowerCase()) {
-                    case "add": new AddCard().execute();
+                    case "add":
+                        new AddCard().execute();
                         break;
-                    case "remove": new RemoveCard().execute();
+                    case "remove":
+                        new RemoveCard().execute();
                         break;
-                    case "import": new ImportFromFile().execute();
+                    case "import":
+                        new ImportFromFile().execute();
                         break;
-                    case "export": new ExportToFile().execute();
+                    case "export":
+                        new ExportToFile().execute();
                         break;
-                    case "ask": new Quiz().execute();
+                    case "ask":
+                        new Quiz().execute();
                         break;
-                    case "log": new LogToFile().execute();
+                    case "log":
+                        new LogToFile().execute();
                         break;
-                    case "hardest card": new HardestCard().execute();
+                    case "hardest card":
+                        new HardestCard().execute();
                         break;
-                    case "reset stats": new ResetStats().execute();
+                    case "reset stats":
+                        new ResetStats().execute();
                         break;
-                    case "exit": new Exit().execute();
+                    case "exit":
+                        new Exit().execute();
                         spinApp = false;
                         break;
                     default:
@@ -83,12 +93,4 @@ public enum FlashcardsApp {
         return configMap;
     }
 
-    Card getCardByDefinition(String definition) {
-        for (Card card : cardsList.values()) {
-            if (definition.equals(card.getDefinition())) {
-                return card;
-            }
-        }
-        return null;
-    }
 }

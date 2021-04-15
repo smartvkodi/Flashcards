@@ -1,42 +1,44 @@
 package flashcards.actions;
 
-import flashcards.models.Action;
-import flashcards.models.AppMessages;
-import flashcards.models.Card;
+import flashcards.models.*;
 
 class AddCard implements Action {
 
-    FlashcardsApp app = FlashcardsApp.INSTANCE;
-
     @Override
     public void execute() {
-        app.appConsole.print(AppMessages.THE_CARD_TERM.getMessage());
+        Card card = new Card();
 
-        String term = app.appScanner.nextLine();
+        ApplicationConsole console = new ApplicationConsole(System.out);
+        console.print(AppMessages.THE_CARD_TERM.getMessage());
 
-        if (app.cardsList.containsKey(term)) {
-            app.appConsole.printf(AppMessages.TERM_ALREADY_EXIST.getMessage(), term);
+        String term = new ApplicationScanner(System.in).nextLine();
 
-        } else if (term != null && !term.isBlank()) {
-            app.appConsole.print(AppMessages.ADD_DEFINITION.getMessage());
+        if (term != null && !term.isBlank()) {
 
-            String definition = app.appScanner.nextLine();
-            if (definition != null && !definition.isBlank()) {
-                Card card = new Card(term, definition);
+            if (card.existsCardWithTerm(term)) {
+                console.printf(AppMessages.TERM_ALREADY_EXIST.getMessage(), term);
 
-                if (app.cardsList.containsValue(card)) {
-                    app.appConsole
-                            .printf(AppMessages.DEFINITION_ALREADY_EXIST.getMessage(), definition);
-                } else {
-                    app.cardsList.put(term, card);
-                    app.appConsole
-                            .printf(AppMessages.PAIR_ADDED.getMessage(), term, definition);
-                }
             } else {
-                app.appConsole.print(AppMessages.DEFINITION_EMPTY.getMessage());
+                console.print(AppMessages.ADD_DEFINITION.getMessage());
+                String definition = new ApplicationScanner(System.in).nextLine();
+
+                if (definition != null && !definition.isBlank()) {
+
+                    if (card.existsCardWithDefinition(definition)) {
+                        console.printf(AppMessages.DEFINITION_ALREADY_EXIST.getMessage(), definition);
+
+                    } else {
+                        card.addNewCard(new Card(term, definition));
+                        console.printf(AppMessages.PAIR_ADDED.getMessage(), term, definition);
+                    }
+
+                } else {
+                    console.print(AppMessages.DEFINITION_EMPTY);
+                }
             }
         } else {
-            app.appConsole.print(AppMessages.TERM_EMPTY.getMessage());
+            console.print(AppMessages.TERM_EMPTY);
         }
+
     }
 }
